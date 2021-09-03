@@ -54,6 +54,7 @@ body {
 				line-height: $top2-height;
 				text-align: center;
 				font-size: 1.25rem;
+				hyphens: auto;
 			}
 
 			.filterWrapper {
@@ -166,62 +167,102 @@ body {
 			}
 
 			.blocks {
+				--max-slots: 1;
 				position: relative;
 				background-image: repeating-linear-gradient(0deg, #ececec, #ececec 1px, #f9f9f9 1px, #f9f9f9);
 				background-size: 20px $block-height;
-				height: 100vh;
+				height: max(calc(var(--max-slots) * #{$block-height}), calc(100vh - #{$top1-height + $top2-height} - 80px));
 
 				.block {
+					--start-minutes: 0;
+					--minutes: 0;
+					--index: 0;
+					--background: white;
+					--color: black;
+					background-color: var(--background);
+					color: var(--color);
+					padding: .5rem;
+					display: flex;
+					flex-flow: column;
 					position: absolute;
 					top: calc(#{$block-height} * var(--index) + #{$block-padding / 2});
 					left: calc(#{$minuteWidth} * var(--start-minutes) + #{$block-padding / 2});
-					background: #c7dcff;
-					color: #28446f;
 					border-radius: $border-radius;
 					width: calc(var(--minutes) * #{$minuteWidth} - #{$block-padding});
-					height: calc(#{$block-height} - #{$block-padding});
+					min-height: calc(#{$block-height} - #{$block-padding});
+					max-height: calc(#{$block-height} - #{$block-padding});
+					height: max-content;
+					transition: all .125s ease;
+					font-size: 0.9rem;
+					cursor: pointer;
 
-					.time {
-						font-size: .9rem;
+
+					&.expanded {
+						z-index: 1;
+						box-shadow: 0 0 2px rgba(0, 0, 0, 0.15),
+							0 4px 4px rgba(0, 0, 0, 0.15),
+							0 8px 8px rgba(0, 0, 0, 0.15),
+							0 16px 16px rgba(0, 0, 0, 0.15);
+					}
+
+					&:hover {
+						.downArrow {
+							opacity: 1;
+						}
+					}
+
+					&:not(.expanded) {
+						.expandedOnly {
+							display: none;
+							opacity: 0;
+							transition-duration: 0.25s;
+						}
+					}
+
+					.expandedOnly {
+						transition: opacity .125s ease;
+					}
+
+					.title {
+						text-align: initial;
+						font-weight: bold;
+						line-height: 1em;
+					}
+
+					.downArrow {
+						position: absolute;
+						top: .5rem;
+						right: .5rem;
+						opacity: 0;
+						width: 2rem;
+						height: 2rem;
+						fill: var(--color);
+						transition: opacity 0.125s ease;
+					}
+
+					&.default {
+						--background: #c7dcff;
+						--color: #28446f;
+					}
+
+					&.red {
+						--background: #e02838;
+						--color: #fff7f7;
+					}
+
+					&.blueish {
+						--background: #4b60c7;
+						--color: #e8edff;
+					}
+
+					&.darkgray {
+						--background: #757575;
+						--color: #f8f8f8;
 					}
 				}
 			}
 		}
 	}
-
-	.block {
-		--start-minutes: 0;
-		--minutes: 0;
-		--index: 0;
-		padding: .5rem;
-		display: flex;
-		flex-flow: column;
-		justify-content: space-between;
-
-		&:not(.expanded) {
-			.expandedOnly {
-				display: none;
-			}
-		}
-
-		.title {
-			text-align: initial;
-			font-weight: bold;
-			font-size: 0.9rem;
-			line-height: 1em;
-		}
-
-		.line {
-			.time {
-			}
-
-			.people {
-				white-space: break-spaces;
-			}
-		}
-
-		.other {
-
-		}
-	}
 }
+
+

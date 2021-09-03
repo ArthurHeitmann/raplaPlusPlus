@@ -2,7 +2,8 @@ import {$class, $classAr} from "./utils.js";
 
 export interface WeekSchedule {
 	days: WeekDay[];
-	allBlocks: ScheduleBlock[]
+	allBlocks: ScheduleBlock[],
+	maxSlots: number
 }
 
 export interface WeekDay {
@@ -11,13 +12,23 @@ export interface WeekDay {
 	blocks: ScheduleBlock[]
 }
 
+type Colors = "default" | "red" | "blueish" | "darkgray";
+
 export interface ScheduleBlock {
 	startMinutes: number,
 	endMinutes: number,
 	title: string,
 	people: string,
 	other: string[],
-	scheduleIndex: number
+	scheduleIndex: number,
+	colorScheme: Colors;
+}
+
+const colorMap: { [cssVal: string]: Colors } = {
+	"rgb(238, 238, 238)": "default",
+	"rgb(255, 0, 0)": "red",
+	"rgb(192, 226, 255)": "blueish",
+	"rgb(204, 204, 204)": "darkgray"
 }
 
 export function getWeekSchedule(): WeekSchedule {
@@ -36,7 +47,8 @@ export function getWeekSchedule(): WeekSchedule {
 			month: parseInt(td.innerText.match(/\w+ \d+\.(\d+)\./)[1]),
 			blocks: []
 		})),
-		allBlocks: []
+		allBlocks: [],
+		maxSlots: null
 	};
 
 	for (const block of $class("week_block")) {
@@ -49,6 +61,7 @@ export function getWeekSchedule(): WeekSchedule {
 		const people = (block.getElementsByClassName("people")[0] as HTMLElement)?.innerText ?? "";
 		const other: string[] = block.$classAr("resource").map(res => res.innerText);
 		const weekDayIndex = getWeekDayIndex(block, dayColumnStartEnd);
+		const colorScheme = colorMap[block.style.getPropertyValue("background-color")] ?? "default";
 		schedule.days[weekDayIndex].blocks.push(<ScheduleBlock> {
 			startMinutes,
 			endMinutes,
@@ -56,8 +69,10 @@ export function getWeekSchedule(): WeekSchedule {
 			people,
 			other,
 			scheduleIndex: null,
+			colorScheme
 		});
 	}
+
 
 	for (const day of schedule.days) {
 		for (const block of day.blocks) {
@@ -70,14 +85,10 @@ export function getWeekSchedule(): WeekSchedule {
 				scheduleIndex++;
 			}
 			block.scheduleIndex = scheduleIndex;
+			schedule.maxSlots = Math.max(schedule.maxSlots, scheduleIndex);
 		}
 	}
-
-	// schedule.allBlocks = schedule.days.map(day => day.blocks).flat();
-	// for (const day of schedule.days) {
-	// 	for (const block of day.blocks)
-	// 		block.allBlocksIndex = schedule.allBlocks.findIndex(b => block === b);
-	// }
+	schedule.maxSlots++;
 
 	return schedule;
 }
