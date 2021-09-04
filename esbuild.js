@@ -46,7 +46,7 @@ function makeGeneralConfig(label, shouldBundle, platform = null) {
 		outbase: "/",
 		...(platform !== null ? { platform } : {}),
 		format: "esm",
-		sourcemap: true,
+		sourcemap: false,
 		watch: isWatchMode ? {
 			onRebuild: watchFeedback(label),
 		} : false
@@ -55,9 +55,20 @@ function makeGeneralConfig(label, shouldBundle, platform = null) {
 
 esbuild.build({
 	entryPoints: [
-		"scripts/main.ts",
+		"scripts/common/main.ts",
 	],
 	...makeGeneralConfig("Browser TS", true, "browser")
+})
+	.catch(() => process.exit(1))
+	.then(() => console.log("esbuild Browser TS transpiled"));
+
+esbuild.build({
+	entryPoints: [
+		"scripts/chromeExtension/background.ts",
+		"scripts/chromeExtension/injected.ts",
+		"scripts/chromeExtension/popup.ts",
+	],
+	...makeGeneralConfig("Chrome Extension TS", true, "browser"),
 })
 	.catch(() => process.exit(1))
 	.then(() => console.log("esbuild Browser TS transpiled"));

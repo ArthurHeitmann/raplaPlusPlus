@@ -9,7 +9,7 @@ const dayDurationMinutes = 60 * 10;
 let weekSchedule: WeekSchedule;
 let timeMarker: HTMLElement;
 
-function main() {
+export function main() {
 	weekSchedule = getWeekSchedule();
 
 	document.head.insertAdjacentHTML("beforeend", `<meta content="width=device-width, initial-scale=1" name="viewport" />`)
@@ -18,7 +18,7 @@ function main() {
 
 	document.body.append(
 		makeElement("div", { class: "newCalendar" }, [
-			timeMarker = makeElement("div", { class: "timeMarker" }),
+			timeMarker = makeElement("div", { class: "timeMarker hide" }),
 			makeElement("div", { class: "center" }, weekSchedule.days.map(day =>
 				makeElement("div", { class: "day" }, [
 					makeElement("div", { class: "header" }, [
@@ -53,7 +53,6 @@ function main() {
 	window.addEventListener("mouseup", dragOnMouseUp);
 	window.addEventListener("mousemove", dragOnMouseMove);
 }
-main();
 
 function rearrangeHeader() {
 	const title = $css("h2.title")[0];
@@ -93,7 +92,10 @@ function toggleBlock(this: HTMLElement) {
 function updateTimeMarker() {
 	const nowDate = new Date();
 	const dayColumn = weekSchedule.days.findIndex(day => day.day === nowDate.getDate())
-	if (dayColumn === -1 && nowDate.getHours() * 60 >= dayStartMinutes && nowDate.getHours() * 60 < dayStartMinutes + dayDurationMinutes) {
+	if (dayColumn === -1 ||
+		weekSchedule.days[dayColumn].month !== nowDate.getMonth() + 1 ||
+		nowDate.getHours() * 60 < dayStartMinutes || nowDate.getHours() * 60 >= dayStartMinutes + dayDurationMinutes
+	) {
 		timeMarker.classList.add("hide");
 		return;
 	}

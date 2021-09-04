@@ -1,3 +1,4 @@
+@use "sass:math";
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
 
 $top1-height: 3rem;
@@ -156,8 +157,8 @@ body {
 					display: flex;
 					flex-flow: column;
 					position: absolute;
-					top: calc(#{$block-height} * var(--index) + #{$block-padding-h / 2});
-					left: calc(#{$minuteWidth} * var(--start-minutes) + #{$block-padding-w / 2});
+					top: calc(#{$block-height} * var(--index) + #{math.div($block-padding-h, 2)});
+					left: calc(#{$minuteWidth} * var(--start-minutes) + #{math.div($block-padding-w, 2)});
 					border-radius: $border-radius;
 					width: calc(var(--minutes) * #{$minuteWidth} - #{$block-padding-w});
 					min-height: calc(#{$block-height} - #{$block-padding-h});
@@ -168,6 +169,7 @@ body {
 					cursor: pointer;
 
 					&.expanded {
+						width: min-content;
 						z-index: 1;
 						box-shadow:
 							0 0 0 rgba(0, 0, 0, 0.1),
