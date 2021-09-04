@@ -4,20 +4,20 @@
 	"version": "1.0",
 	"manifest_version": 3,
 	"background": {
-		"service_worker": "scripts/chromeExtension/background.js"
+		"service_worker": "background.js"
 	},
 	"permissions": [
 		"storage"
 	],
 	"action": {
-		"default_popup": "scripts/chromeExtension/popup.html"
+		"default_popup": "popup.html"
 	},
 	"content_scripts": [
 		{
 			"matches": ["https://rapla.dhbw-karlsruhe.de/rapla?page=calendar*"],
 			"run_at": "document_start",
-			"css": ["style/main.css"],
-			"js": ["scripts/chromeExtension/injected.js"]
+			"css": ["../style/main.css"],
+			"js": ["injected.js"]
 		}
 	]
 }

@@ -1,7 +1,7 @@
 node_modules
 .idea
 .vscode
-scripts/**/*.js
-scripts/**/*.js.map
-style/**/*.css
-style/**/*.css.map
+*/**/*.js
+*/**/*.js.map
+*/**/*.css
+*/**/*.css.map

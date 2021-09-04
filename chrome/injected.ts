@@ -1,4 +1,4 @@
-import {main} from "../common/main.js";
+import {main} from "../scripts/common/main.js";
 
 chrome.storage.sync.get("enabled", ({ enabled }) => {
 	if (!enabled)

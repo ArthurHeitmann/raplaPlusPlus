@@ -64,14 +64,15 @@ esbuild.build({
 
 esbuild.build({
 	entryPoints: [
-		"scripts/chromeExtension/background.ts",
-		"scripts/chromeExtension/injected.ts",
-		"scripts/chromeExtension/popup.ts",
+		"chrome/background.ts",
+		"chrome/injected.ts",
+		"chrome/popup.ts",
+		"universal/injected.ts",
 	],
-	...makeGeneralConfig("Chrome Extension TS", true, "browser"),
+	...makeGeneralConfig("Extension TS", true, "browser"),
 })
 	.catch(() => process.exit(1))
-	.then(() => console.log("esbuild Browser TS transpiled"));
+	.then(() => console.log("esbuild Extension TS transpiled"));
 
 esbuild.build({
 	entryPoints: [
