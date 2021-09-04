@@ -83,7 +83,9 @@ esbuild.build({
 		sassPlugin({
 		})
 	],
-	...makeGeneralConfig("SCSS", false)
+	...makeGeneralConfig("SCSS", false),
+	outfile: "chrome/main.css",
+	outdir: undefined
 })
 	.catch(() => process.exit(1))
 	.then(() => console.log("esbuild SCSS transpiled"));

@@ -16,7 +16,7 @@
 		{
 			"matches": ["https://rapla.dhbw-karlsruhe.de/rapla?page=calendar*"],
 			"run_at": "document_start",
-			"css": ["../style/main.css"],
+			"css": ["main.css"],
 			"js": ["injected.js"]
 		}
 	]
