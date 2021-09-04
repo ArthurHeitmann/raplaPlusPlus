@@ -9,6 +9,7 @@ export interface WeekSchedule {
 export interface WeekDay {
 	day: number,
 	month: number,
+	dayName: string,
 	blocks: ScheduleBlock[]
 }
 
@@ -43,6 +44,7 @@ export function getWeekSchedule(): WeekSchedule {
 
 	const schedule: WeekSchedule = {
 		days: weekDayHeaders.map(td => (<WeekDay>{
+			dayName: td.innerText.match(/(\w+) \d+\.\d+\./)[1],
 			day: parseInt(td.innerText.match(/\w+ (\d+)\.\d+\./)[1]),
 			month: parseInt(td.innerText.match(/\w+ \d+\.(\d+)\./)[1]),
 			blocks: []
@@ -58,7 +60,7 @@ export function getWeekSchedule(): WeekSchedule {
 		const startMinutes: number = parseInt(timeAndTitleMatches[1]) * 60 + parseInt(timeAndTitleMatches[2]);
 		const endMinutes: number = parseInt(timeAndTitleMatches[3]) * 60 + parseInt(timeAndTitleMatches[4]);
 		const title = textNodes[1].textContent.replace(/\s+/g, " ");
-		const people = (block.getElementsByClassName("people")[0] as HTMLElement)?.innerText ?? "";
+		const people = (block.getElementsByClassName("person")[0] as HTMLElement)?.innerText ?? "";
 		const other: string[] = block.$classAr("resource").map(res => res.innerText);
 		const weekDayIndex = getWeekDayIndex(block, dayColumnStartEnd);
 		const colorScheme = colorMap[block.style.getPropertyValue("background-color")] ?? "default";

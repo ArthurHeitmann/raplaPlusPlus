@@ -32,6 +32,10 @@ export function nDigitNumber(num: number, digits = 2): string {
 	return "0".repeat(Math.max(0, digits - numStr.length)) + numStr;
 }
 
+export function classInElementTree(elem: Element, className: string): boolean {
+	return Boolean(elem) && (elem.classList.contains(className) || classInElementTree(elem.parentElement, className));
+}
+
 /** document.getElementById replacement */
 export function $id(id: string): HTMLElement {
 	return document.getElementById(id);

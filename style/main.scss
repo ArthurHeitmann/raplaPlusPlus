@@ -12,7 +12,10 @@ $border-faint2: #0000000d;
 $minuteWidth: 0.0625rem;
 $block-height: 5.5rem;
 $block-spacing: .5rem;
-$block-padding: 1rem;
+$block-padding-w: 0.125rem;
+$block-padding-h: 1rem;
+$scrollbar-color: #ababab;
+$scrollbar-color-hover: #8d8d8d;
 
 * {
 	padding: 0;
@@ -22,6 +25,25 @@ $block-padding: 1rem;
 	box-sizing: border-box;
 	-webkit-tap-highlight-color: transparent;
 	font-family: "Poppins", sans-serif;
+	scrollbar-width: thin;
+	scrollbar-color: $scrollbar-color transparent;
+}
+
+::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+	background: $scrollbar-color;
+
+	&:hover {
+		background: $scrollbar-color-hover;
+	}
 }
 
 @media (max-width: 600px), (max-height: 450px) {
@@ -32,19 +54,24 @@ $block-padding: 1rem;
 
 html, body {
 	overflow-x: auto;
+	height: 100%;
 }
 
 body {
 	background: #f9f9f9;
+
+	&.isDragging {
+		user-select: none;
+	}
 }
 
 .newCalendar {
 	width: max-content;
 	display: flex;
 	margin-top: $header-height;
-	background-image: repeating-linear-gradient(0deg, #ececec, #ececec 1px, #f9f9f9 1px, #f9f9f9);
-	background-size: 20px $block-height;
-	background-position-y: calc(#{$top1-height + $top2-height - $block-height} + 1px);
+	background-color: #f9f9f9;
+	background-image: linear-gradient(to right, #e2e2e2 1px, transparent 1px);
+	background-size: $minuteWidth * 60 $block-height;
 
 	> .center {
 		display: flex;
@@ -80,7 +107,7 @@ body {
 					height: $top2-height;
 
 					.hour {
-						flex-grow: 1;
+						flex: 1 1 0;
 						height: $top2-height;
 						line-height: $top2-height;
 						text-align: center;
@@ -90,7 +117,7 @@ body {
 
 						+.hour {
 							border-left: $border-faint;
-						}
+							}
 					}
 				}
 			}
@@ -102,7 +129,7 @@ body {
 						calc(var(--max-slots) * #{$block-height}),
 						calc(100vh - #{$header-height + $top1-height + $top2-height} - 20px)
 				);
-				--multi: 0.1;
+				--multi: 0.05;
 				background-image: linear-gradient(180deg,
 						rgba(0, 0, 0, calc(var(--multi) * 1.00)) 0rem,
  						rgba(0, 0, 0, calc(var(--multi) * 0.85)) 0.4rem,
@@ -128,17 +155,16 @@ body {
 					display: flex;
 					flex-flow: column;
 					position: absolute;
-					top: calc(#{$block-height} * var(--index) + #{$block-padding / 2});
-					left: calc(#{$minuteWidth} * var(--start-minutes) + #{$block-padding / 2});
+					top: calc(#{$block-height} * var(--index) + #{$block-padding-h / 2});
+					left: calc(#{$minuteWidth} * var(--start-minutes) + #{$block-padding-w / 2});
 					border-radius: $border-radius;
-					width: calc(var(--minutes) * #{$minuteWidth} - #{$block-padding});
-					min-height: calc(#{$block-height} - #{$block-padding});
-					max-height: calc(#{$block-height} - #{$block-padding});
+					width: calc(var(--minutes) * #{$minuteWidth} - #{$block-padding-w});
+					min-height: calc(#{$block-height} - #{$block-padding-h});
+					max-height: calc(#{$block-height} - #{$block-padding-h});
 					height: max-content;
 					transition: all .125s ease;
 					font-size: 0.9rem;
 					cursor: pointer;
-
 
 					&.expanded {
 						z-index: 1;

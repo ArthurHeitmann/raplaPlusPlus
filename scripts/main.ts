@@ -1,5 +1,6 @@
 import {getWeekSchedule} from "./scheduleParser.js";
 import {$css, $id, makeElement, minutesToTimeStr, nDigitNumber} from "./utils.js";
+import {dragOnMouseDown, dragOnMouseMove, dragOnMouseUp} from "./dragger.js";
 
 const dayStartMinutes = 60 * 8;
 const minuteIntervals = 60;
@@ -7,6 +8,7 @@ const dayDurationMinutes = 60 * 10;
 
 function main() {
 	const weekSchedule = getWeekSchedule();
+	console.log(weekSchedule)
 
 	document.head.insertAdjacentHTML("beforeend", `<meta content="width=device-width, initial-scale=1" name="viewport" />`)
 	$id("calendar").remove();
@@ -17,7 +19,7 @@ function main() {
 			makeElement("div", { class: "center" }, weekSchedule.days.map(day =>
 				makeElement("div", { class: "day" }, [
 					makeElement("div", { class: "header" }, [
-						makeElement("div", { class: "dayTitle" }, `${nDigitNumber(day.day)}.${nDigitNumber(day.month)}.`),
+						makeElement("div", { class: "dayTitle" }, `${day.dayName} ${nDigitNumber(day.day)}.${nDigitNumber(day.month)}.`),
 						makeElement("div", { class: "hours" },
 							Array(Math.floor(dayDurationMinutes / minuteIntervals)).fill(null)
 								.map((_, i) => (dayStartMinutes + i * minuteIntervals) / 60)
@@ -41,6 +43,9 @@ function main() {
 			))
 		])
 	);
+	window.addEventListener("mousedown", dragOnMouseDown);
+	window.addEventListener("mouseup", dragOnMouseUp);
+	window.addEventListener("mousemove", dragOnMouseMove);
 }
 main();
 
