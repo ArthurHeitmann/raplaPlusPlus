@@ -47,16 +47,6 @@ export function $classAr(c: string): Array<HTMLElement> {
 	return Array.from(document.getElementsByClassName(c) as HTMLCollectionOf<HTMLElement>);
 }
 
-/** document.getElementsByTagName shorthand */
-export function $tag(tag: string): HTMLCollectionOf<HTMLElement> {
-	return document.getElementsByTagName(tag) as HTMLCollectionOf<HTMLElement>;
-}
-
-/** Array.from(document.getElementsByTagName) shorthand */
-export function $tagAr(tag: string): Array<HTMLElement> {
-	return Array.from(document.getElementsByTagName(tag) as HTMLCollectionOf<HTMLElement>);
-}
-
 /** document.querySelectorAll shorthand */
 export function $css(query: string): NodeListOf<HTMLElement> {
 	return document.querySelectorAll(query) as NodeListOf<HTMLElement>;

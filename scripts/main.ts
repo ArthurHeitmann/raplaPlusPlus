@@ -1,5 +1,5 @@
 import {getWeekSchedule} from "./scheduleParser.js";
-import {$id, makeElement, minutesToTimeStr, nDigitNumber} from "./utils.js";
+import {$css, $id, makeElement, minutesToTimeStr, nDigitNumber} from "./utils.js";
 
 const dayStartMinutes = 60 * 8;
 const minuteIntervals = 60;
@@ -7,30 +7,13 @@ const dayDurationMinutes = 60 * 10;
 
 function main() {
 	const weekSchedule = getWeekSchedule();
-	console.log(weekSchedule)
 
-	$id("calendar").style.display = "none";
+	document.head.insertAdjacentHTML("beforeend", `<meta content="width=device-width, initial-scale=1" name="viewport" />`)
+	$id("calendar").remove();
+	rearrangeHeader();
 
 	document.body.append(
 		makeElement("div", { class: "newCalendar" }, [
-			// makeElement("div", { class: "left" }, [
-			// 	makeElement("div", { class: "corner" }, [
-			// 		makeElement("div", { class: "title" }, "Filter"),
-			// 		makeElement("div", { class: "filterWrapper" }, [
-			// 			makeElement("input", { type: "text" })
-			// 		])
-			// 	]),
-			// 	makeElement("div", { class: "allBlocksList" },
-			// 		weekSchedule.allBlocks.map(block => makeElement("div", { class: "block" }, [
-			// 			makeElement("div", { class: "title" }, block.title),
-			// 			makeElement("div", { class: "line" }, [
-			// 				makeElement("div", { class: "time" }, `${minutesToTimeStr(block.startMinutes)} - ${minutesToTimeStr(block.endMinutes)}`),
-			// 				block.people && makeElement("div", { class: "people" }, `${block.people}`)
-			// 			]),
-			// 			...block.other.map(other => makeElement("div", { class: "other expandedOnly" }, other))
-			// 		]))
-			// 	)
-			// ]),
 			makeElement("div", { class: "center" }, weekSchedule.days.map(day =>
 				makeElement("div", { class: "day" }, [
 					makeElement("div", { class: "header" }, [
@@ -61,8 +44,30 @@ function main() {
 }
 main();
 
+function rearrangeHeader() {
+	const title = $css("h2.title")[0];
+	const form = $css(".datechooser > form")[0];
+	const prevBtn = $css("input[type=submit][name=prev]")[0];
+	const nextBtn = $css("input[type=submit][name=next]")[0];
+	const todayBtn = $css("input[type=submit][name=today]")[0];
+	const showDateBtn = $css("input[type=submit][name=goto]")[0];
+	const hiddenInputs = $css("input[type=hidden]");
+	const selects = $css("select[name]");
+
+	$css(".datechooser")[0].remove();
+	form.innerText = "";
+	form.append(...hiddenInputs, prevBtn, todayBtn, ...selects, showDateBtn, nextBtn);
+
+	const newHeader = makeElement("div", { class: "newHeader" }, [
+		title, form
+	]);
+	document.body.insertAdjacentElement("afterbegin", newHeader);
+}
+
 function toggleBlock(this: HTMLElement) {
 	if (this.classList.contains("expanded")) {
+		if (document.getSelection().toString())
+			return;
 		this.classList.remove("expanded");
 		this.style.removeProperty("max-height");
 		this.style.removeProperty("min-height");
