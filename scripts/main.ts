@@ -1,4 +1,4 @@
-import {getWeekSchedule} from "./scheduleParser.js";
+import {getWeekSchedule, WeekSchedule} from "./scheduleParser.js";
 import {$css, $id, makeElement, minutesToTimeStr, nDigitNumber} from "./utils.js";
 import {dragOnMouseDown, dragOnMouseMove, dragOnMouseUp} from "./dragger.js";
 
@@ -6,9 +6,11 @@ const dayStartMinutes = 60 * 8;
 const minuteIntervals = 60;
 const dayDurationMinutes = 60 * 10;
 
+let weekSchedule: WeekSchedule;
+let timeMarker: HTMLElement;
+
 function main() {
-	const weekSchedule = getWeekSchedule();
-	console.log(weekSchedule)
+	weekSchedule = getWeekSchedule();
 
 	document.head.insertAdjacentHTML("beforeend", `<meta content="width=device-width, initial-scale=1" name="viewport" />`)
 	$id("calendar").remove();
@@ -16,6 +18,7 @@ function main() {
 
 	document.body.append(
 		makeElement("div", { class: "newCalendar" }, [
+			timeMarker = makeElement("div", { class: "timeMarker" }),
 			makeElement("div", { class: "center" }, weekSchedule.days.map(day =>
 				makeElement("div", { class: "day" }, [
 					makeElement("div", { class: "header" }, [
@@ -40,9 +43,12 @@ function main() {
 						])
 					))
 				])
-			))
+			)),
 		])
 	);
+	updateTimeMarker();
+	setInterval(updateTimeMarker, 1000);
+
 	window.addEventListener("mousedown", dragOnMouseDown);
 	window.addEventListener("mouseup", dragOnMouseUp);
 	window.addEventListener("mousemove", dragOnMouseMove);
@@ -84,10 +90,25 @@ function toggleBlock(this: HTMLElement) {
 	}
 }
 
+function updateTimeMarker() {
+	const nowDate = new Date();
+	const dayColumn = weekSchedule.days.findIndex(day => day.day === nowDate.getDate())
+	if (dayColumn === -1 && nowDate.getHours() * 60 >= dayStartMinutes && nowDate.getHours() * 60 < dayStartMinutes + dayDurationMinutes) {
+		timeMarker.classList.add("hide");
+		return;
+	}
+	timeMarker.classList.remove("hide");
+	timeMarker.style.setProperty("--minutes", (dayDurationMinutes * dayColumn + (nowDate.getHours() * 60 - dayStartMinutes) + nowDate.getMinutes()).toString());
+}
+
+let downArrowSvg: Element;
 function makeSvgArrow(): Element {
-	const dummy = document.createElement("div");
-	dummy.innerHTML = `<svg class="downArrow" xmlns="http://www.w3.org/2000/svg" data-name="Layer 2" viewBox="0 0 48 48" x="0px" y="0px"><title>video music player</title><path d="M24,31a2,2,0,0,1-1.41-.59l-10-10a2,2,0,0,1,2.82-2.82L24,26.17l8.59-8.58a2,2,0,0,1,2.82,2.82l-10,10A2,2,0,0,1,24,31Z"></path></svg>`;
-	return dummy.children[0];
+	if (!downArrowSvg) {
+		const dummy = document.createElement("div");
+		dummy.innerHTML = `<svg class="downArrow" xmlns="http://www.w3.org/2000/svg" data-name="Layer 2" viewBox="0 0 48 48" x="0px" y="0px"><title>video music player</title><path d="M24,31a2,2,0,0,1-1.41-.59l-10-10a2,2,0,0,1,2.82-2.82L24,26.17l8.59-8.58a2,2,0,0,1,2.82,2.82l-10,10A2,2,0,0,1,24,31Z"></path></svg>`;
+		downArrowSvg = dummy.children[0];
+	}
+	return downArrowSvg.cloneNode(true) as Element;
 }
 
 

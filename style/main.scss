@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
 
 $top1-height: 3rem;
 $top2-height: 3rem;
@@ -72,6 +72,7 @@ body {
 	background-color: #f9f9f9;
 	background-image: linear-gradient(to right, #e2e2e2 1px, transparent 1px);
 	background-size: $minuteWidth * 60 $block-height;
+	position: relative;
 
 	> .center {
 		display: flex;
@@ -127,7 +128,7 @@ body {
 				position: relative;
 				height: max(
 						calc(var(--max-slots) * #{$block-height}),
-						calc(100vh - #{$header-height + $top1-height + $top2-height} - 20px)
+						calc(100vh - #{$header-height + $top1-height + $top2-height} - 10px)
 				);
 				--multi: 0.05;
 				background-image: linear-gradient(180deg,
@@ -233,6 +234,22 @@ body {
 			}
 		}
 	}
+
+	.timeMarker {
+		$width: 4rem;
+		--minutes: 0;
+		position: absolute;
+		top: 0;
+		left: calc(var(--minutes) * #{$minuteWidth} - #{$width} + 2px);
+		width: $width;
+		height: 100%;
+		border-right: 2px solid #4388ff;
+		background-image: linear-gradient(to right, transparent 0%, #4388ff28 100%);
+
+		&.hide {
+			display: none;
+		}
+	}
 }
 
 .newHeader {
@@ -275,10 +292,6 @@ body {
 			&:active {
 				background: #d8d8d8;
 			}
-		}
-
-		select {
-
 		}
 	}
 }
