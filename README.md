@@ -17,6 +17,8 @@ Rapla aber übersichtlicher
 
 ### Tampermonkey
 
+Utilities > File > Import **Browse**
+
 `universal/rapla++_tampermonkey.json` importieren
 
 ### Universal
@@ -36,6 +38,6 @@ npm run build
 ```
 
 ```shell
-# auto update geänderte Dateien
+# auto rebuild
 npm run watch 
 ```

@@ -1,6 +1,6 @@
-import {getWeekSchedule, WeekSchedule} from "./scheduleParser.js";
-import {$css, $id, makeElement, minutesToTimeStr, nDigitNumber} from "./utils.js";
-import {dragOnMouseDown, dragOnMouseMove, dragOnMouseUp} from "./dragger.js";
+import {getWeekSchedule, WeekSchedule} from "./scheduleParser";
+import {$css, $id, makeElement, minutesToTimeStr, nDigitNumber} from "./utils";
+import {dragOnMouseDown, dragOnMouseMove, dragOnMouseUp} from "./dragger";
 
 const dayStartMinutes = 60 * 8;
 const minuteIntervals = 60;
@@ -8,8 +8,13 @@ const dayDurationMinutes = 60 * 10;
 
 let weekSchedule: WeekSchedule;
 let timeMarker: HTMLElement;
+let mainExecuted = false;
 
 export function main() {
+	if (mainExecuted)
+		return;
+	mainExecuted = true;
+
 	weekSchedule = getWeekSchedule();
 
 	document.head.insertAdjacentHTML("beforeend", `<meta content="width=device-width, initial-scale=1" name="viewport" />`)

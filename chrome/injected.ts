@@ -1,20 +1,24 @@
-import {main} from "../scripts/common/main.js";
+import {main} from "../scripts/common/main";
 
-chrome.storage.sync.get("enabled", ({ enabled }) => {
+let isReady = false;
+
+chrome.storage.local.get("enabled", ({ enabled }) => {
 	if (!enabled)
 		return;
-	if (document.body) {
+	if (isReady)
 		main();
-	}
-	else {
-		new MutationObserver((mutations, observer) => {
-			if (mutations.find(mutation => [...mutation.addedNodes].find(node => node.nodeName === "BODY"))) {
-				main();
-				observer.disconnect();
-			}
-		}).observe(document.documentElement, {childList: true});
-	}
-})
+	else
+		isReady = true;
+});
+
+document.addEventListener("readystatechange", () => {
+	if (document.readyState !== "interactive")
+		return;
+	if (isReady)
+		main();
+	else
+		isReady = true;
+});
 
 chrome.storage.onChanged.addListener((changes) => {
 	if ("enabled" in changes) {

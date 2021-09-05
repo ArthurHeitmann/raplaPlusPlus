@@ -1,4 +1,4 @@
-// scripts/common/main.js
+// scripts/common/utils.ts
 function makeElement(tagName, attributes, inner, useInnerHTML = false) {
   attributes = attributes || {};
   inner = inner || [];
@@ -74,6 +74,8 @@ Object.defineProperty(Element.prototype, "$cssAr", {
     return Array.from(this.querySelectorAll(cssQuery));
   }
 });
+
+// scripts/common/scheduleParser.ts
 var colorMap = {
   "rgb(238, 238, 238)": "default",
   "rgb(255, 0, 0)": "red",
@@ -136,6 +138,8 @@ function getWeekDayIndex(td, dayColumnStartEnd) {
   const column = [...td.parentElement.children].findIndex((childTd) => childTd === td);
   return dayColumnStartEnd.findIndex((startEnd) => column >= startEnd[0] && column < startEnd[1]);
 }
+
+// scripts/common/dragger.ts
 var startX = 0;
 var startY = 0;
 var lastX = 0;
@@ -175,12 +179,18 @@ function dragOnMouseMove(e) {
     isSelectionDisabled = true;
   }
 }
+
+// scripts/common/main.ts
 var dayStartMinutes = 60 * 8;
 var minuteIntervals = 60;
 var dayDurationMinutes = 60 * 10;
 var weekSchedule;
 var timeMarker;
+var mainExecuted = false;
 function main() {
+  if (mainExecuted)
+    return;
+  mainExecuted = true;
   weekSchedule = getWeekSchedule();
   document.head.insertAdjacentHTML("beforeend", `<meta content="width=device-width, initial-scale=1" name="viewport" />`);
   $id("calendar").remove();
@@ -263,19 +273,22 @@ function makeSvgArrow() {
 }
 
 // chrome/injected.ts
-chrome.storage.sync.get("enabled", ({ enabled }) => {
+var isReady = false;
+chrome.storage.local.get("enabled", ({ enabled }) => {
   if (!enabled)
     return;
-  if (document.body) {
+  if (isReady)
     main();
-  } else {
-    new MutationObserver((mutations, observer) => {
-      if (mutations.find((mutation) => [...mutation.addedNodes].find((node) => node.nodeName === "BODY"))) {
-        main();
-        observer.disconnect();
-      }
-    }).observe(document.documentElement, { childList: true });
-  }
+  else
+    isReady = true;
+});
+document.addEventListener("readystatechange", () => {
+  if (document.readyState !== "interactive")
+    return;
+  if (isReady)
+    main();
+  else
+    isReady = true;
 });
 chrome.storage.onChanged.addListener((changes) => {
   if ("enabled" in changes) {

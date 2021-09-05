@@ -1,3 +1,3 @@
 const input = document.querySelector("input");
-input.oninput = () => chrome.storage.sync.set({ enabled: input.checked });
-chrome.storage.sync.get("enabled", ({ enabled }) => input.checked = enabled);
+input.oninput = () => chrome.storage.local.set({ enabled: input.checked });
+chrome.storage.local.get("enabled", ({ enabled }) => input.checked = enabled);

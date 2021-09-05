@@ -186,7 +186,11 @@ var minuteIntervals = 60;
 var dayDurationMinutes = 60 * 10;
 var weekSchedule;
 var timeMarker;
+var mainExecuted = false;
 function main() {
+  if (mainExecuted)
+    return;
+  mainExecuted = true;
   weekSchedule = getWeekSchedule();
   document.head.insertAdjacentHTML("beforeend", `<meta content="width=device-width, initial-scale=1" name="viewport" />`);
   $id("calendar").remove();
