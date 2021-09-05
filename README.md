@@ -25,6 +25,11 @@ Utilities > File > Import **Browse**
 
 `universal/injected.js` mit einem JS injector Plugin für `https://rapla.dhbw-karlsruhe.de/rapla?page=calendar*`
 
+### Firefox
+
+Open `about:debugging` in Firefox > Click "This Firefox" > Click "Load Temporary Add-on" > Choose `firefox/manifest.json`<br>
+Sadly, after a restart of Firefox, you currently need to load the Add-on again.
+
 ## Development
 
 ```shell
