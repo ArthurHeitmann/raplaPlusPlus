@@ -79,8 +79,9 @@ body {
 		display: flex;
 
 		.day {
-			width: $minuteWidth * 600;
-			min-width: $minuteWidth * 600;
+			--dayLengthInMinutes: 60 * 10;
+			width: calc(#{$minuteWidth} * var(--dayLengthInMinutes));
+			min-width: calc(#{$minuteWidth} * var(--dayLengthInMinutes));
 			position: relative;
 
 			+ .day {

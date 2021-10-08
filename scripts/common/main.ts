@@ -2,10 +2,6 @@ import {getWeekSchedule, WeekSchedule} from "./scheduleParser";
 import {$css, $id, makeElement, minutesToTimeStr, nDigitNumber} from "./utils";
 import {dragOnMouseDown, dragOnMouseMove, dragOnMouseUp} from "./dragger";
 
-const dayStartMinutes = 60 * 8;
-const minuteIntervals = 60;
-const dayDurationMinutes = 60 * 10;
-
 let weekSchedule: WeekSchedule;
 let timeMarker: HTMLElement;
 let mainExecuted = false;
@@ -25,19 +21,19 @@ export function main() {
 		makeElement("div", { class: "newCalendar" }, [
 			timeMarker = makeElement("div", { class: "timeMarker hide" }),
 			makeElement("div", { class: "center" }, weekSchedule.days.map(day =>
-				makeElement("div", { class: "day" }, [
+				makeElement("div", { class: "day", style: `--dayLengthInMinutes: ${(day.endHour - day.startHour) * 60}` }, [
 					makeElement("div", { class: "header" }, [
 						makeElement("div", { class: "dayTitle" }, `${day.dayName} ${nDigitNumber(day.day)}.${nDigitNumber(day.month)}.`),
 						makeElement("div", { class: "hours" },
-							Array(Math.floor(dayDurationMinutes / minuteIntervals)).fill(null)
-								.map((_, i) => (dayStartMinutes + i * minuteIntervals) / 60)
+							Array(day.endHour - day.startHour).fill(null)
+								.map((_, i) => day.startHour + i)
 								.map(hour => makeElement("div", { class: "hour" }, hour.toString()))
 						)
 					]),
 					makeElement("div", { class: "blocks", style: `--max-slots: ${weekSchedule.maxSlots}` }, day.blocks.map(block =>
 						makeElement("div", {
 							class: `block ${block.colorScheme}`,
-							style: `--start-minutes: ${(block.startMinutes - dayStartMinutes)}; --minutes: ${block.endMinutes - block.startMinutes}; --index: ${block.scheduleIndex}`,
+							style: `--start-minutes: ${(block.startMinutes - day.startHour * 60)}; --minutes: ${block.endMinutes - block.startMinutes}; --index: ${block.scheduleIndex}`,
 							onclick: toggleBlock
 						}, [
 							makeElement("div", { class: "title" }, block.title),
@@ -97,15 +93,24 @@ function toggleBlock(this: HTMLElement) {
 function updateTimeMarker() {
 	const nowDate = new Date();
 	const dayColumn = weekSchedule.days.findIndex(day => day.day === nowDate.getDate())
+	const todayData = weekSchedule.days[dayColumn];
+	let dayStartMinutes = todayData?.startHour * 60;
+	let dayDurationMinutes = (todayData?.endHour - todayData?.startHour) * 60;
 	if (dayColumn === -1 ||
-		weekSchedule.days[dayColumn].month !== nowDate.getMonth() + 1 ||
+		todayData.month !== nowDate.getMonth() + 1 ||
 		nowDate.getHours() * 60 < dayStartMinutes || nowDate.getHours() * 60 >= dayStartMinutes + dayDurationMinutes
 	) {
 		timeMarker.classList.add("hide");
 		return;
 	}
 	timeMarker.classList.remove("hide");
-	timeMarker.style.setProperty("--minutes", (dayDurationMinutes * dayColumn + (nowDate.getHours() * 60 - dayStartMinutes) + nowDate.getMinutes()).toString());
+	const previousDaysMinutes = weekSchedule.days
+		.slice(0, dayColumn)
+		.reduce((prev, curr) => prev + (curr.endHour - curr.startHour), 0)
+		* 60;
+	timeMarker.style.setProperty("--minutes", (
+		previousDaysMinutes + (nowDate.getHours() - todayData.startHour) * 60 + nowDate.getMinutes()
+		).toString());
 }
 
 let downArrowSvg: Element;

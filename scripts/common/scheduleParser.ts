@@ -10,6 +10,8 @@ export interface WeekDay {
 	day: number,
 	month: number,
 	dayName: string,
+	startHour: number,
+	endHour: number,
 	blocks: ScheduleBlock[]
 }
 
@@ -44,10 +46,12 @@ export function getWeekSchedule(): WeekSchedule {
 	}
 
 	const schedule: WeekSchedule = {
-		days: weekDayHeaders.map(td => (<WeekDay>{
+		days: weekDayHeaders.map(td => ({
 			dayName: td.innerText.match(/(\w+) \d+\.\d+\./)[1],
 			day: parseInt(td.innerText.match(/\w+ (\d+)\.\d+\./)[1]),
 			month: parseInt(td.innerText.match(/\w+ \d+\.(\d+)\./)[1]),
+			startHour: null,
+			endHour: null,
 			blocks: []
 		})),
 		allBlocks: [],
@@ -110,6 +114,8 @@ export function getWeekSchedule(): WeekSchedule {
 	}
 
 	for (const day of schedule.days) {
+		day.startHour = Math.min(...day.blocks.map(block => Math.floor(block.startMinutes / 60)), 8);
+		day.endHour = Math.max(...day.blocks.map(block => Math.ceil(block.endMinutes / 60)), 16);
 		for (const block of day.blocks) {
 			let scheduleIndex = 0;
 			// find time schedule index with no overlapping time ranges
