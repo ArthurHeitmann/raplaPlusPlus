@@ -228,6 +228,7 @@ function main() {
   mainExecuted = true;
   weekSchedule = getWeekSchedule();
   document.head.insertAdjacentHTML("beforeend", `<meta content="width=device-width, initial-scale=1" name="viewport" />`);
+  document.head.insertAdjacentHTML("beforeend", `<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">`);
   $id("calendar").remove();
   rearrangeHeader();
   document.body.append(makeElement("div", { class: "newCalendar" }, [
