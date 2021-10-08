@@ -1,8 +1,13 @@
 import esbuild from "esbuild";
 import {sassPlugin} from "esbuild-sass-plugin";
 import {spawn} from "child_process";
+import fs from "fs";
 
 const isWatchMode = process.argv.includes("watch") || process.argv.includes("-w") || process.argv.includes("--watch");
+const cssDestinations = [
+	"chrome/main.css",
+	"firefox/main.css",
+]
 
 const tscTypeChecker = spawn("npx", ["tsc", "--noEmit", "--preserveWatchOutput"].concat(isWatchMode ? "-w" : []), { shell: true });
 function displayChunk(chunk) {
@@ -39,7 +44,7 @@ function watchFeedback(label) {
 			console.log(`rebuild ${label} done`);
 	}
 }
-function makeGeneralConfig(label, shouldBundle, platform = null) {
+function makeGeneralConfig(label, shouldBundle, platform = undefined, onRebuildCallback = () => undefined) {
 	return {
 		bundle: shouldBundle,
 		outdir: "/",
@@ -48,32 +53,47 @@ function makeGeneralConfig(label, shouldBundle, platform = null) {
 		format: "esm",
 		sourcemap: false,
 		watch: isWatchMode ? {
-			onRebuild: watchFeedback(label),
+			onRebuild: (error, result) => {
+				watchFeedback(label)(error);
+				onRebuildCallback(error, result);
+			},
 		} : false
 	}
 }
 
 esbuild.build({
 	entryPoints: [
-		"scripts/common/main.ts",
-	],
-	...makeGeneralConfig("Browser TS", true, "browser")
-})
-	.catch(() => process.exit(1))
-	.then(() => console.log("esbuild Browser TS transpiled"));
-
-esbuild.build({
-	entryPoints: [
 		"chrome/background.ts",
 		"chrome/injected.ts",
 		"chrome/popup.ts",
+		"firefox/background.ts",
+		"firefox/injected.ts",
+		"firefox/popup.ts",
 		"universal/injected.ts",
 	],
-	...makeGeneralConfig("Extension TS", true, "browser"),
+	...makeGeneralConfig("Extension TS", true, "browser", copyCssToDestinations),
 })
 	.catch(() => process.exit(1))
-	.then(() => console.log("esbuild Extension TS transpiled"));
+	.then(() => {
+		console.log("esbuild Extension TS transpiled");
+		copyCssToDestinations();
+	});
 
+function copyCssToDestinations(error, buildResult) {
+	if (error || buildResult?.errors?.length)
+		return;
+
+	for (const dest of cssDestinations)
+		fs.copyFileSync("style/main.css", dest);
+	try {
+		const universalInjected = fs.readFileSync("universal/injected.js").toString();
+		const generatedCss = fs.readFileSync("style/main.css").toString();
+		const injectedCss = universalInjected.replace(/(?<=const style = `).*(?=`;)/s, generatedCss);
+		fs.writeFileSync("universal/injected.js", injectedCss);
+	} catch (e) {
+		console.warn("Couldn't insert css to universal/injected.js (file doesn't exist)");
+	}
+}
 esbuild.build({
 	entryPoints: [
 		"style/main.scss",
@@ -83,12 +103,14 @@ esbuild.build({
 		sassPlugin({
 		})
 	],
-	...makeGeneralConfig("SCSS", false),
-	outfile: "chrome/main.css",
-	outdir: undefined
+	...makeGeneralConfig("SCSS", false, undefined, copyCssToDestinations)
+
 })
 	.catch(() => process.exit(1))
-	.then(() => console.log("esbuild SCSS transpiled"));
+	.then(() => {
+		console.log("esbuild SCSS transpiled");
+		copyCssToDestinations();
+	});
 
 if (isWatchMode)
 	console.log("esbuild started watch");

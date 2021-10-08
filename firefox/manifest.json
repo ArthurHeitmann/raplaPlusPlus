@@ -1,0 +1,23 @@
+{
+	"manifest_version": 2,
+	"name": "raplaPlusPlus",
+	"version": "1.0",
+	"description": "Makes for a more fancy version of RaPla.",
+	"background": {
+		"scripts": ["background.js"]
+	},
+	"permissions": [
+		"storage"
+	],
+	"browser_action": {
+		"default_popup": "popup.html"
+	},
+	"content_scripts": [
+		{
+			"matches": ["https://rapla.dhbw-karlsruhe.de/rapla?page=calendar*"],
+			"run_at": "document_start",
+			"css": ["main.css"],
+			"js": ["injected.js"]
+		}
+	]
+}

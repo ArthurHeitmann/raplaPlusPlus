@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "@types/chrome": "^0.0.155",
+    "@types/firefox-webext-browser": "^82.0.1",
     "esbuild-sass-plugin": "^1.5.2"
   }
 }

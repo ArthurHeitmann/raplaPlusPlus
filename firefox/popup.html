@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="de">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport"
+		  content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+	<title>Rapla++</title>
+	<style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap');
+
+		body {
+			width: 10rem;
+			height: 10rem;
+			font-family: "Poppins", sans-serif;
+			margin: 0;
+			padding: 1rem;
+			user-select: none;
+			display: flex;
+			flex-direction: column;
+			justify-content: space-around;
+			align-items: center;
+		}
+
+		* {
+			margin: 0;
+			padding: 0;
+		}
+
+		input {
+			display: none;
+		}
+
+		label {
+			width: 8rem;
+			height: 4rem;
+			border-radius: 2rem;
+			background: #e3e3e3;
+            position: relative;
+			transition: all 0.25s ease;
+            cursor: pointer;
+			display: block;
+		}
+
+		label::after {
+			content: "";
+			position: absolute;
+			top: .4rem;
+			left: .4rem;
+			width: 3.2rem;
+			height: 3.2rem;
+			border-radius: 50%;
+			background: white;
+            transition: all 0.25s ease;
+		}
+
+		input:checked + label {
+			background: #f05321;
+		}
+
+		input:checked + label::after {
+			margin-left: 4rem;
+		}
+	</style>
+</head>
+<body>
+	<h1>Rapla++</h1>
+	<input type="checkbox" id="isEnabledCheckbox">
+	<label for="isEnabledCheckbox"></label>
+	<script src="popup.js"></script>
+</body>
+</html>
