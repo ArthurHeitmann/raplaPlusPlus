@@ -286,7 +286,13 @@ function updateTimeMarker() {
     timeMarker.classList.add("hide");
     return;
   }
-  timeMarker.classList.remove("hide");
+  if (timeMarker.classList.contains("hide")) {
+    timeMarker.classList.remove("hide");
+    const dayElement = $css(".center > .day")[dayColumn];
+    const bounds = dayElement.getBoundingClientRect();
+    if (bounds.left < 0 || bounds.right > window.innerHeight)
+      document.body.scrollBy({ left: bounds.left - 100 });
+  }
   const previousDaysMinutes = weekSchedule.days.slice(0, dayColumn).reduce((prev, curr) => prev + (curr.endHour - curr.startHour), 0) * 60;
   timeMarker.style.setProperty("--minutes", (previousDaysMinutes + (nowDate.getHours() - todayData.startHour) * 60 + nowDate.getMinutes()).toString());
 }
