@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "node esbuild.js",
-    "watch": "node esbuild.js watch"
+    "watch": "node esbuild.js watch",
+    "prePublish": "zip -jrFS \"rapla++ chrome.zip\" ./chrome && zip -jrFS \"rapla++ firefox.zip\" ./firefox"
   },
   "type": "module",
   "keywords": [],
