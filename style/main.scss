@@ -153,6 +153,7 @@ body {
 					--background: white;
 					--color: black;
 					background-color: var(--background);
+					text-shadow: 0 0 2px var(--background), 0 0 4px var(--background), 0 0 6px var(--background);
 					color: var(--color);
 					padding: .5rem;
 					display: flex;

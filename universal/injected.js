@@ -132,15 +132,20 @@ function getWeekSchedule() {
       if (!cell.classList.contains("week_block"))
         continue;
       const linkNode = cell.$css("a .link")[0] ?? cell.$tag("a")[0];
-      const textNodes = [...linkNode.childNodes].filter((n) => n.nodeType === Node.TEXT_NODE);
-      const timeAndTitleMatches = textNodes[0].textContent.match(/(\d\d):(\d\d)\s*-\s*(\d\d):(\d\d)/);
+      const texts = [...linkNode.childNodes].filter((n) => n.nodeType === Node.TEXT_NODE).map((node) => node.textContent);
+      const other = cell.$classAr("resource").map((res) => res.innerText);
+      let location = other.find((text) => /Hörsaal|Audimax|^[A-Z]\d+/i.test(text));
+      if (!location && other.find((text) => /Virtueller Raum/.test(text)))
+        location = "Online";
+      const timeAndTitleMatches = texts[0].match(/(\d\d):(\d\d)\s*-\s*(\d\d):(\d\d)/);
       const weekDayIndex = getWeekDayIndex(x, dayColumnStartEnd);
       schedule.days[weekDayIndex].blocks.push({
         startMinutes: parseInt(timeAndTitleMatches[1]) * 60 + parseInt(timeAndTitleMatches[2]),
         endMinutes: parseInt(timeAndTitleMatches[3]) * 60 + parseInt(timeAndTitleMatches[4]),
-        title: textNodes[1].textContent.replace(/\s+/g, " "),
+        title: texts[1].replace(/\s+/g, " "),
+        location,
         people: cell.getElementsByClassName("person")[0]?.innerText ?? "",
-        other: cell.$classAr("resource").map((res) => res.innerText),
+        other,
         scheduleIndex: null,
         colorScheme: colorMap[cell.style.getPropertyValue("background-color")] ?? "default"
       });
@@ -233,6 +238,7 @@ function main() {
       }, [
         makeElement("div", { class: "title" }, block.title),
         makeElement("div", { class: "time" }, `${minutesToTimeStr(block.startMinutes)} - ${minutesToTimeStr(block.endMinutes)}`),
+        block.location && makeElement("div", { class: "location" }, `${block.location}`),
         block.people && makeElement("div", { class: "people expandedOnly" }, `${block.people}`),
         ...block.other.map((other) => makeElement("div", { class: "other expandedOnly" }, other)),
         makeSvgArrow()

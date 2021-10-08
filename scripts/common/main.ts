@@ -38,6 +38,7 @@ export function main() {
 						}, [
 							makeElement("div", { class: "title" }, block.title),
 							makeElement("div", { class: "time" }, `${minutesToTimeStr(block.startMinutes)} - ${minutesToTimeStr(block.endMinutes)}`),
+							block.location && makeElement("div", { class: "location" }, `${block.location}`),
 							block.people && makeElement("div", { class: "people expandedOnly" }, `${block.people}`),
 							...block.other.map(other => makeElement("div", { class: "other expandedOnly" }, other)),
 							makeSvgArrow()
