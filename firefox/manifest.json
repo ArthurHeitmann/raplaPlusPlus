@@ -3,6 +3,9 @@
 	"name": "raplaPlusPlus",
 	"version": "1.0",
 	"description": "Makes for a more fancy version of RaPla.",
+	"icons": {
+		"128": "logo.png"
+	},
 	"background": {
 		"scripts": ["background.js"]
 	},

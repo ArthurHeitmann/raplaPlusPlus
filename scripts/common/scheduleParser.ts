@@ -1,4 +1,4 @@
-import {$class, $classAr} from "./utils.js";
+import {$class, $classAr} from "./utils";
 
 export interface WeekSchedule {
 	days: WeekDay[];

@@ -1,5 +1,5 @@
-// scripts/common/main.js
-function makeElement(tagName, attributes, inner, useInnerHTML = false) {
+// scripts/common/utils.ts
+function makeElement(tagName, attributes, inner) {
   attributes = attributes || {};
   inner = inner || [];
   const elem = document.createElement(tagName);
@@ -11,10 +11,8 @@ function makeElement(tagName, attributes, inner, useInnerHTML = false) {
   }
   if (inner instanceof Array)
     elem.append(...inner.filter((value) => Boolean(value)));
-  else if (!useInnerHTML)
-    elem.innerText = inner;
   else
-    elem.innerHTML = inner;
+    elem.innerText = inner;
   return elem;
 }
 function minutesToTimeStr(minutes) {
@@ -74,6 +72,8 @@ Object.defineProperty(Element.prototype, "$cssAr", {
     return Array.from(this.querySelectorAll(cssQuery));
   }
 });
+
+// scripts/common/scheduleParser.ts
 var colorMap = {
   "rgb(238, 238, 238)": "default",
   "rgb(255, 0, 0)": "red",
@@ -174,6 +174,8 @@ function getCellSpan(cell, type) {
 function getWeekDayIndex(x, dayColumnStartEnd) {
   return dayColumnStartEnd.findIndex((startEnd) => x >= startEnd[0] && x < startEnd[1]);
 }
+
+// scripts/common/dragger.ts
 var startX = 0;
 var startY = 0;
 var lastX = 0;
@@ -213,6 +215,8 @@ function dragOnMouseMove(e) {
     isSelectionDisabled = true;
   }
 }
+
+// scripts/common/main.ts
 var weekSchedule;
 var timeMarker;
 var mainExecuted = false;
@@ -222,6 +226,7 @@ function main() {
   mainExecuted = true;
   weekSchedule = getWeekSchedule();
   document.head.insertAdjacentHTML("beforeend", `<meta content="width=device-width, initial-scale=1" name="viewport" />`);
+  document.head.insertAdjacentHTML("beforeend", `<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">`);
   $id("calendar").remove();
   rearrangeHeader();
   document.body.append(makeElement("div", { class: "newCalendar" }, [

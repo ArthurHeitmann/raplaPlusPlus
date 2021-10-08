@@ -1,4 +1,4 @@
-import {classInElementTree} from "./utils.js";
+import {classInElementTree} from "./utils";
 
 let startX = 0;
 let startY = 0;

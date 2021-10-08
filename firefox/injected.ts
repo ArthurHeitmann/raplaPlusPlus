@@ -1,4 +1,4 @@
-import {main} from "../scripts/common/main.js";
+import {main} from "../scripts/common/main";
 
 let isReady = false;
 

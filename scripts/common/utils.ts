@@ -2,8 +2,7 @@
 export function makeElement<K extends keyof HTMLElementTagNameMap>(
 	tagName: K | string,
 	attributes?: Record<string, string | EventListener>,
-	inner?: (HTMLElement | Node | string)[] | string,
-	useInnerHTML = false
+	inner?: (HTMLElement | Node | string)[] | string
 ): HTMLElement {
 	attributes = attributes || {};
 	inner = inner || [];
@@ -16,10 +15,8 @@ export function makeElement<K extends keyof HTMLElementTagNameMap>(
 	}
 	if (inner instanceof Array)
 		elem.append(...inner.filter(value => Boolean(value)));
-	else if (!useInnerHTML)
-		elem.innerText = inner;
 	else
-		elem.innerHTML = inner;
+		elem.innerText = inner;
 	return elem;
 }
 

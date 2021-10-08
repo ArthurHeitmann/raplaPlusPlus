@@ -112,5 +112,9 @@ esbuild.build({
 		copyCssToDestinations();
 	});
 
+
 if (isWatchMode)
 	console.log("esbuild started watch");
+
+fs.copyFileSync("logo.png", "chrome/logo.png");
+fs.copyFileSync("logo.png", "firefox/logo.png");

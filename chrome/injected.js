@@ -1,5 +1,5 @@
 // scripts/common/utils.ts
-function makeElement(tagName, attributes, inner, useInnerHTML = false) {
+function makeElement(tagName, attributes, inner) {
   attributes = attributes || {};
   inner = inner || [];
   const elem = document.createElement(tagName);
@@ -11,10 +11,8 @@ function makeElement(tagName, attributes, inner, useInnerHTML = false) {
   }
   if (inner instanceof Array)
     elem.append(...inner.filter((value) => Boolean(value)));
-  else if (!useInnerHTML)
-    elem.innerText = inner;
   else
-    elem.innerHTML = inner;
+    elem.innerText = inner;
   return elem;
 }
 function minutesToTimeStr(minutes) {
