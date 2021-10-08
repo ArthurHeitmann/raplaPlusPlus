@@ -85,7 +85,7 @@ function getWeekSchedule() {
   const dayColumnStartEnd = [];
   const dayColSpans = weekDayHeaders.map((td) => parseInt(td.getAttribute("colspan") ?? "1"));
   for (let i = 0; i < dayColSpans.length; i++) {
-    const previous = i > 0 ? dayColumnStartEnd[i - 1][1] : 0;
+    const previous = i > 0 ? dayColumnStartEnd[i - 1][1] : 1;
     dayColumnStartEnd.push([previous, previous + dayColSpans[i]]);
   }
   const schedule = {
@@ -98,26 +98,53 @@ function getWeekSchedule() {
     allBlocks: [],
     maxSlots: null
   };
-  for (const block of $class("week_block")) {
-    const linkNode = block.$css("a .link")[0] ?? block.$tag("a")[0];
-    const textNodes = [...linkNode.childNodes].filter((n) => n.nodeType === Node.TEXT_NODE);
-    const timeAndTitleMatches = textNodes[0].textContent.match(/(\d\d):(\d\d)\s*-\s*(\d\d):(\d\d)/);
-    const startMinutes = parseInt(timeAndTitleMatches[1]) * 60 + parseInt(timeAndTitleMatches[2]);
-    const endMinutes = parseInt(timeAndTitleMatches[3]) * 60 + parseInt(timeAndTitleMatches[4]);
-    const title = textNodes[1].textContent.replace(/\s+/g, " ");
-    const people = block.getElementsByClassName("person")[0]?.innerText ?? "";
-    const other = block.$classAr("resource").map((res) => res.innerText);
-    const weekDayIndex = getWeekDayIndex(block, dayColumnStartEnd);
-    const colorScheme = colorMap[block.style.getPropertyValue("background-color")] ?? "default";
-    schedule.days[weekDayIndex].blocks.push({
-      startMinutes,
-      endMinutes,
-      title,
-      people,
-      other,
-      scheduleIndex: null,
-      colorScheme
-    });
+  const tableElement = $class("week_table")[0];
+  let tableRows = 0;
+  let tableColumns = 0;
+  for (const row of tableElement.rows) {
+    let rowHeight = 1;
+    let rowWidth = 0;
+    for (const cell of row.cells) {
+      rowHeight = Math.min(rowHeight, getCellSpan(cell, "rowspan"));
+      rowWidth += getCellSpan(cell, "colspan");
+    }
+    tableRows += rowHeight;
+    tableColumns = Math.max(tableColumns, rowWidth);
+  }
+  const virtualTable = Array(tableRows).fill(null).map(() => Array(tableColumns).fill(false));
+  let y = 0;
+  for (const row of tableElement.rows) {
+    let x = 0;
+    let rowHeight = 1;
+    for (const cell of row.cells) {
+      if (virtualTable[y][x])
+        x++;
+      const cellRowSpan = getCellSpan(cell, "rowspan");
+      const cellColSpan = getCellSpan(cell, "colspan");
+      for (let cellY = y; cellY < Math.min(y + cellRowSpan, tableRows); cellY++) {
+        for (let cellX = x; cellX < Math.min(x + cellColSpan, tableColumns); cellX++)
+          virtualTable[cellY][cellX] = true;
+      }
+      rowHeight = Math.min(rowHeight, cellRowSpan);
+      x++;
+      if (!cell.classList.contains("week_block"))
+        continue;
+      const linkNode = cell.$css("a .link")[0] ?? cell.$tag("a")[0];
+      const textNodes = [...linkNode.childNodes].filter((n) => n.nodeType === Node.TEXT_NODE);
+      const timeAndTitleMatches = textNodes[0].textContent.match(/(\d\d):(\d\d)\s*-\s*(\d\d):(\d\d)/);
+      const weekDayIndex = getWeekDayIndex(x, dayColumnStartEnd);
+      schedule.days[weekDayIndex].blocks.push({
+        startMinutes: parseInt(timeAndTitleMatches[1]) * 60 + parseInt(timeAndTitleMatches[2]),
+        endMinutes: parseInt(timeAndTitleMatches[3]) * 60 + parseInt(timeAndTitleMatches[4]),
+        title: textNodes[1].textContent.replace(/\s+/g, " "),
+        people: cell.getElementsByClassName("person")[0]?.innerText ?? "",
+        other: cell.$classAr("resource").map((res) => res.innerText),
+        scheduleIndex: null,
+        colorScheme: colorMap[cell.style.getPropertyValue("background-color")] ?? "default"
+      });
+    }
+    for (let i = 0; i < rowHeight; i++)
+      y++;
   }
   for (const day of schedule.days) {
     for (const block of day.blocks) {
@@ -132,9 +159,11 @@ function getWeekSchedule() {
   schedule.maxSlots++;
   return schedule;
 }
-function getWeekDayIndex(td, dayColumnStartEnd) {
-  const column = [...td.parentElement.children].findIndex((childTd) => childTd === td);
-  return dayColumnStartEnd.findIndex((startEnd) => column >= startEnd[0] && column < startEnd[1]);
+function getCellSpan(cell, type) {
+  return parseInt(cell.getAttribute(type) ?? "1");
+}
+function getWeekDayIndex(x, dayColumnStartEnd) {
+  return dayColumnStartEnd.findIndex((startEnd) => x >= startEnd[0] && x < startEnd[1]);
 }
 var startX = 0;
 var startY = 0;
