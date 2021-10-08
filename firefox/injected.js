@@ -85,7 +85,7 @@ function getWeekSchedule() {
   const dayColumnStartEnd = [];
   const dayColSpans = weekDayHeaders.map((td) => parseInt(td.getAttribute("colspan") ?? "1"));
   for (let i = 0; i < dayColSpans.length; i++) {
-    const previous = i > 0 ? dayColumnStartEnd[i - 1][1] : 0;
+    const previous = i > 0 ? dayColumnStartEnd[i - 1][1] : 1;
     dayColumnStartEnd.push([previous, previous + dayColSpans[i]]);
   }
   const schedule = {
@@ -93,33 +93,69 @@ function getWeekSchedule() {
       dayName: td.innerText.match(/(\w+) \d+\.\d+\./)[1],
       day: parseInt(td.innerText.match(/\w+ (\d+)\.\d+\./)[1]),
       month: parseInt(td.innerText.match(/\w+ \d+\.(\d+)\./)[1]),
+      startHour: null,
+      endHour: null,
       blocks: []
     })),
     allBlocks: [],
     maxSlots: null
   };
-  for (const block of $class("week_block")) {
-    const linkNode = block.$css("a .link")[0] ?? block.$tag("a")[0];
-    const textNodes = [...linkNode.childNodes].filter((n) => n.nodeType === Node.TEXT_NODE);
-    const timeAndTitleMatches = textNodes[0].textContent.match(/(\d\d):(\d\d)\s*-\s*(\d\d):(\d\d)/);
-    const startMinutes = parseInt(timeAndTitleMatches[1]) * 60 + parseInt(timeAndTitleMatches[2]);
-    const endMinutes = parseInt(timeAndTitleMatches[3]) * 60 + parseInt(timeAndTitleMatches[4]);
-    const title = textNodes[1].textContent.replace(/\s+/g, " ");
-    const people = block.getElementsByClassName("person")[0]?.innerText ?? "";
-    const other = block.$classAr("resource").map((res) => res.innerText);
-    const weekDayIndex = getWeekDayIndex(block, dayColumnStartEnd);
-    const colorScheme = colorMap[block.style.getPropertyValue("background-color")] ?? "default";
-    schedule.days[weekDayIndex].blocks.push({
-      startMinutes,
-      endMinutes,
-      title,
-      people,
-      other,
-      scheduleIndex: null,
-      colorScheme
-    });
+  const tableElement = $class("week_table")[0];
+  let tableRows = 0;
+  let tableColumns = 0;
+  for (const row of tableElement.rows) {
+    let rowHeight = 1;
+    let rowWidth = 0;
+    for (const cell of row.cells) {
+      rowHeight = Math.min(rowHeight, getCellSpan(cell, "rowspan"));
+      rowWidth += getCellSpan(cell, "colspan");
+    }
+    tableRows += rowHeight;
+    tableColumns = Math.max(tableColumns, rowWidth);
+  }
+  const virtualTable = Array(tableRows).fill(null).map(() => Array(tableColumns).fill(false));
+  let y = 0;
+  for (const row of tableElement.rows) {
+    let x = 0;
+    let rowHeight = 1;
+    for (const cell of row.cells) {
+      if (virtualTable[y][x])
+        x++;
+      const cellRowSpan = getCellSpan(cell, "rowspan");
+      const cellColSpan = getCellSpan(cell, "colspan");
+      for (let cellY = y; cellY < Math.min(y + cellRowSpan, tableRows); cellY++) {
+        for (let cellX = x; cellX < Math.min(x + cellColSpan, tableColumns); cellX++)
+          virtualTable[cellY][cellX] = true;
+      }
+      rowHeight = Math.min(rowHeight, cellRowSpan);
+      x++;
+      if (!cell.classList.contains("week_block"))
+        continue;
+      const linkNode = cell.$css("a .link")[0] ?? cell.$tag("a")[0];
+      const texts = [...linkNode.childNodes].filter((n) => n.nodeType === Node.TEXT_NODE).map((node) => node.textContent);
+      const other = cell.$classAr("resource").map((res) => res.innerText);
+      let location2 = other.find((text) => /Hörsaal|Audimax|^[A-Z]\d+/i.test(text));
+      if (!location2 && other.find((text) => /Virtueller Raum/.test(text)))
+        location2 = "Online";
+      const timeAndTitleMatches = texts[0].match(/(\d\d):(\d\d)\s*-\s*(\d\d):(\d\d)/);
+      const weekDayIndex = getWeekDayIndex(x, dayColumnStartEnd);
+      schedule.days[weekDayIndex].blocks.push({
+        startMinutes: parseInt(timeAndTitleMatches[1]) * 60 + parseInt(timeAndTitleMatches[2]),
+        endMinutes: parseInt(timeAndTitleMatches[3]) * 60 + parseInt(timeAndTitleMatches[4]),
+        title: texts[1].replace(/\s+/g, " "),
+        location: location2,
+        people: cell.getElementsByClassName("person")[0]?.innerText ?? "",
+        other,
+        scheduleIndex: null,
+        colorScheme: colorMap[cell.style.getPropertyValue("background-color")] ?? "default"
+      });
+    }
+    for (let i = 0; i < rowHeight; i++)
+      y++;
   }
   for (const day of schedule.days) {
+    day.startHour = Math.min(...day.blocks.map((block) => Math.floor(block.startMinutes / 60)), 8);
+    day.endHour = Math.max(...day.blocks.map((block) => Math.ceil(block.endMinutes / 60)), 16);
     for (const block of day.blocks) {
       let scheduleIndex = 0;
       while (day.blocks.findIndex((b) => b.scheduleIndex === scheduleIndex && (block.startMinutes <= b.endMinutes && block.endMinutes >= b.startMinutes)) !== -1) {
@@ -132,9 +168,11 @@ function getWeekSchedule() {
   schedule.maxSlots++;
   return schedule;
 }
-function getWeekDayIndex(td, dayColumnStartEnd) {
-  const column = [...td.parentElement.children].findIndex((childTd) => childTd === td);
-  return dayColumnStartEnd.findIndex((startEnd) => column >= startEnd[0] && column < startEnd[1]);
+function getCellSpan(cell, type) {
+  return parseInt(cell.getAttribute(type) ?? "1");
+}
+function getWeekDayIndex(x, dayColumnStartEnd) {
+  return dayColumnStartEnd.findIndex((startEnd) => x >= startEnd[0] && x < startEnd[1]);
 }
 var startX = 0;
 var startY = 0;
@@ -175,9 +213,6 @@ function dragOnMouseMove(e) {
     isSelectionDisabled = true;
   }
 }
-var dayStartMinutes = 60 * 8;
-var minuteIntervals = 60;
-var dayDurationMinutes = 60 * 10;
 var weekSchedule;
 var timeMarker;
 var mainExecuted = false;
@@ -191,18 +226,19 @@ function main() {
   rearrangeHeader();
   document.body.append(makeElement("div", { class: "newCalendar" }, [
     timeMarker = makeElement("div", { class: "timeMarker hide" }),
-    makeElement("div", { class: "center" }, weekSchedule.days.map((day) => makeElement("div", { class: "day" }, [
+    makeElement("div", { class: "center" }, weekSchedule.days.map((day) => makeElement("div", { class: "day", style: `--dayLengthInMinutes: ${(day.endHour - day.startHour) * 60}` }, [
       makeElement("div", { class: "header" }, [
         makeElement("div", { class: "dayTitle" }, `${day.dayName} ${nDigitNumber(day.day)}.${nDigitNumber(day.month)}.`),
-        makeElement("div", { class: "hours" }, Array(Math.floor(dayDurationMinutes / minuteIntervals)).fill(null).map((_, i) => (dayStartMinutes + i * minuteIntervals) / 60).map((hour) => makeElement("div", { class: "hour" }, hour.toString())))
+        makeElement("div", { class: "hours" }, Array(day.endHour - day.startHour).fill(null).map((_, i) => day.startHour + i).map((hour) => makeElement("div", { class: "hour" }, hour.toString())))
       ]),
       makeElement("div", { class: "blocks", style: `--max-slots: ${weekSchedule.maxSlots}` }, day.blocks.map((block) => makeElement("div", {
         class: `block ${block.colorScheme}`,
-        style: `--start-minutes: ${block.startMinutes - dayStartMinutes}; --minutes: ${block.endMinutes - block.startMinutes}; --index: ${block.scheduleIndex}`,
+        style: `--start-minutes: ${block.startMinutes - day.startHour * 60}; --minutes: ${block.endMinutes - block.startMinutes}; --index: ${block.scheduleIndex}`,
         onclick: toggleBlock
       }, [
         makeElement("div", { class: "title" }, block.title),
         makeElement("div", { class: "time" }, `${minutesToTimeStr(block.startMinutes)} - ${minutesToTimeStr(block.endMinutes)}`),
+        block.location && makeElement("div", { class: "location" }, `${block.location}`),
         block.people && makeElement("div", { class: "people expandedOnly" }, `${block.people}`),
         ...block.other.map((other) => makeElement("div", { class: "other expandedOnly" }, other)),
         makeSvgArrow()
@@ -249,12 +285,22 @@ function toggleBlock() {
 function updateTimeMarker() {
   const nowDate = new Date();
   const dayColumn = weekSchedule.days.findIndex((day) => day.day === nowDate.getDate());
-  if (dayColumn === -1 || weekSchedule.days[dayColumn].month !== nowDate.getMonth() + 1 || nowDate.getHours() * 60 < dayStartMinutes || nowDate.getHours() * 60 >= dayStartMinutes + dayDurationMinutes) {
+  const todayData = weekSchedule.days[dayColumn];
+  let dayStartMinutes = todayData?.startHour * 60;
+  let dayDurationMinutes = (todayData?.endHour - todayData?.startHour) * 60;
+  if (dayColumn === -1 || todayData.month !== nowDate.getMonth() + 1 || nowDate.getHours() * 60 < dayStartMinutes || nowDate.getHours() * 60 >= dayStartMinutes + dayDurationMinutes) {
     timeMarker.classList.add("hide");
     return;
   }
-  timeMarker.classList.remove("hide");
-  timeMarker.style.setProperty("--minutes", (dayDurationMinutes * dayColumn + (nowDate.getHours() * 60 - dayStartMinutes) + nowDate.getMinutes()).toString());
+  if (timeMarker.classList.contains("hide")) {
+    timeMarker.classList.remove("hide");
+    const dayElement = $css(".center > .day")[dayColumn];
+    const bounds = dayElement.getBoundingClientRect();
+    if (bounds.left < 0 || bounds.right > window.innerHeight)
+      document.body.scrollBy({ left: bounds.left - 100 });
+  }
+  const previousDaysMinutes = weekSchedule.days.slice(0, dayColumn).reduce((prev, curr) => prev + (curr.endHour - curr.startHour), 0) * 60;
+  timeMarker.style.setProperty("--minutes", (previousDaysMinutes + (nowDate.getHours() - todayData.startHour) * 60 + nowDate.getMinutes()).toString());
 }
 var downArrowSvg;
 function makeSvgArrow() {
