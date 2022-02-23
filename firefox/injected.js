@@ -77,7 +77,6 @@ Object.defineProperty(Element.prototype, "$cssAr", {
 var colorMap = {
   "rgb(238, 238, 238)": "default",
   "rgb(255, 0, 0)": "red",
-  "rgb(192, 226, 255)": "blueish",
   "rgb(204, 204, 204)": "darkgray"
 };
 function getWeekSchedule() {
@@ -135,8 +134,8 @@ function getWeekSchedule() {
       const texts = [...linkNode.childNodes].filter((n) => n.nodeType === Node.TEXT_NODE).map((node) => node.textContent);
       const other = cell.$classAr("resource").map((res) => res.innerText);
       let location2 = other.find((text) => /Hörsaal|Audimax|^[A-Z]\d+/i.test(text));
-      if (!location2 && other.find((text) => /Virtueller Raum/.test(text)))
-        location2 = "Online";
+      if (other.find((text) => /Virtueller Raum/.test(text)))
+        location2 = location2 ? `${location2} / Online` : "Online";
       const timeAndTitleMatches = texts[0].match(/(\d\d):(\d\d)\s*-\s*(\d\d):(\d\d)/);
       const weekDayIndex = getWeekDayIndex(x, dayColumnStartEnd);
       schedule.days[weekDayIndex].blocks.push({
@@ -224,6 +223,7 @@ function main() {
   if (mainExecuted)
     return;
   mainExecuted = true;
+  document.body.classList.remove("loading");
   weekSchedule = getWeekSchedule();
   document.head.insertAdjacentHTML("beforeend", `<meta content="width=device-width, initial-scale=1" name="viewport" />`);
   document.head.insertAdjacentHTML("beforeend", `<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">`);
@@ -250,6 +250,14 @@ function main() {
       ])))
     ])))
   ]));
+  for (let block of $css("div.block")) {
+    const overflowHeightDiff = block.scrollHeight - block.offsetHeight;
+    if (overflowHeightDiff < 7)
+      continue;
+    block.classList.add("slightlySmaller");
+    if (overflowHeightDiff > 12)
+      block.classList.add("smaller");
+  }
   updateTimeMarker();
   setInterval(updateTimeMarker, 1e3);
   window.addEventListener("mousedown", dragOnMouseDown);
@@ -293,16 +301,18 @@ function updateTimeMarker() {
   const todayData = weekSchedule.days[dayColumn];
   let dayStartMinutes = todayData?.startHour * 60;
   let dayDurationMinutes = (todayData?.endHour - todayData?.startHour) * 60;
+  const dayElement = $css(".center > .day")[dayColumn];
+  if (dayElement && timeMarker.classList.contains("hide")) {
+    const bounds = dayElement.getBoundingClientRect();
+    if (bounds.left < 0 || bounds.right > window.innerHeight)
+      document.body.scrollBy({ left: bounds.left - 100 });
+  }
   if (dayColumn === -1 || todayData.month !== nowDate.getMonth() + 1 || nowDate.getHours() * 60 < dayStartMinutes || nowDate.getHours() * 60 >= dayStartMinutes + dayDurationMinutes) {
     timeMarker.classList.add("hide");
     return;
   }
   if (timeMarker.classList.contains("hide")) {
     timeMarker.classList.remove("hide");
-    const dayElement = $css(".center > .day")[dayColumn];
-    const bounds = dayElement.getBoundingClientRect();
-    if (bounds.left < 0 || bounds.right > window.innerHeight)
-      document.body.scrollBy({ left: bounds.left - 100 });
   }
   const previousDaysMinutes = weekSchedule.days.slice(0, dayColumn).reduce((prev, curr) => prev + (curr.endHour - curr.startHour), 0) * 60;
   timeMarker.style.setProperty("--minutes", (previousDaysMinutes + (nowDate.getHours() - todayData.startHour) * 60 + nowDate.getMinutes()).toString());
