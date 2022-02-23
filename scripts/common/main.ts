@@ -52,12 +52,13 @@ export function main() {
 		])
 	);
 
+	// scale down text of large blocks
 	for (let block of $css("div.block")) {
 		const overflowHeightDiff = block.scrollHeight - block.offsetHeight;
 		if (overflowHeightDiff < 7)
 			continue;
 		block.classList.add("slightlySmaller");
-		if (overflowHeightDiff >= 10)
+		if (overflowHeightDiff > 12)
 			block.classList.add("smaller");
 	}
 
@@ -110,6 +111,14 @@ function updateTimeMarker() {
 	const todayData = weekSchedule.days[dayColumn];
 	let dayStartMinutes = todayData?.startHour * 60;
 	let dayDurationMinutes = (todayData?.endHour - todayData?.startHour) * 60;
+	// scroll to today
+	const dayElement = $css(".center > .day")[dayColumn];
+	if (dayElement && timeMarker.classList.contains("hide")) {
+		const bounds = dayElement.getBoundingClientRect();
+		if (bounds.left < 0 || bounds.right > window.innerHeight)
+			document.body.scrollBy({left: bounds.left - 100});
+	}
+	// hide if wrong month or time outside active hours or no column exists for this day
 	if (dayColumn === -1 ||
 		todayData.month !== nowDate.getMonth() + 1 ||
 		nowDate.getHours() * 60 < dayStartMinutes || nowDate.getHours() * 60 >= dayStartMinutes + dayDurationMinutes
@@ -117,12 +126,9 @@ function updateTimeMarker() {
 		timeMarker.classList.add("hide");
 		return;
 	}
+	// otherwise show
 	if (timeMarker.classList.contains("hide")) {
 		timeMarker.classList.remove("hide");
-		const dayElement = $css(".center > .day")[dayColumn];
-		const bounds = dayElement.getBoundingClientRect();
-		if (bounds.left < 0 || bounds.right > window.innerHeight)
-			document.body.scrollBy({ left: bounds.left - 100 });
 	}
 	const previousDaysMinutes = weekSchedule.days
 		.slice(0, dayColumn)
