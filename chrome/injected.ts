@@ -5,6 +5,7 @@ let isReady = false;
 chrome.storage.local.get("enabled", ({ enabled }) => {
 	if (!enabled)
 		return;
+	document.body.classList.add("loading");
 	if (isReady)
 		main();
 	else

@@ -60,9 +60,15 @@ html, body {
 
 body {
 	background: #f9f9f9;
+	transition: opacity .25s ease;
 
 	&.isDragging {
 		user-select: none;
+	}
+
+	&.loading {
+		opacity: 0;
+		transition-duration: 0s;
 	}
 }
 
@@ -155,7 +161,7 @@ body {
 					background-color: var(--background);
 					text-shadow: 0 0 2px var(--background), 0 0 4px var(--background), 0 0 6px var(--background);
 					color: var(--color);
-					padding: .5rem;
+					padding: .5rem 0 .5rem .5rem;
 					display: flex;
 					flex-flow: column;
 					position: absolute;
@@ -187,11 +193,27 @@ body {
 					}
 
 					&:not(.expanded) {
+						> * {
+							line-height: 1.15em;
+						}
+
 						.expandedOnly {
 							display: none;
 							opacity: 0;
 							transition-duration: 0.25s;
 						}
+					}
+
+					&:not(.expanded).slightlySmaller {
+						padding-top: 0.25rem;
+
+						> * {
+							font-size: 0.85rem;
+						}
+					}
+
+					&:not(.expanded).smaller > * {
+						font-size: 0.8em;
 					}
 
 					.expandedOnly {

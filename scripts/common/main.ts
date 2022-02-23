@@ -11,6 +11,8 @@ export function main() {
 		return;
 	mainExecuted = true;
 
+	document.body.classList.remove("loading");
+
 	weekSchedule = getWeekSchedule();
 
 	document.head.insertAdjacentHTML("beforeend", `<meta content="width=device-width, initial-scale=1" name="viewport" />`)
@@ -49,6 +51,16 @@ export function main() {
 			)),
 		])
 	);
+
+	for (let block of $css("div.block")) {
+		const overflowHeightDiff = block.scrollHeight - block.offsetHeight;
+		if (overflowHeightDiff < 7)
+			continue;
+		block.classList.add("slightlySmaller");
+		if (overflowHeightDiff >= 10)
+			block.classList.add("smaller");
+	}
+
 	updateTimeMarker();
 	setInterval(updateTimeMarker, 1000);
 

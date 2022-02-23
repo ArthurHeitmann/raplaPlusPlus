@@ -31,7 +31,7 @@ export interface ScheduleBlock {
 const colorMap: { [cssVal: string]: Colors } = {
 	"rgb(238, 238, 238)": "default",
 	"rgb(255, 0, 0)": "red",
-	"rgb(192, 226, 255)": "blueish",
+	// "rgb(192, 226, 255)": "blueish",
 	"rgb(204, 204, 204)": "darkgray"
 }
 
@@ -102,8 +102,8 @@ export function getWeekSchedule(): WeekSchedule {
 				.map(node => node.textContent);
 			const other = cell.$classAr("resource").map(res => res.innerText);
 			let location = other.find(text => /Hörsaal|Audimax|^[A-Z]\d+/i.test(text));
-			if (!location && other.find(text => /Virtueller Raum/.test(text)))
-				location = "Online"
+			if (other.find(text => /Virtueller Raum/.test(text)))
+				location = location ? `${location} / Online` : "Online";
 			const timeAndTitleMatches = texts[0].match(/(\d\d):(\d\d)\s*-\s*(\d\d):(\d\d)/);
 			const weekDayIndex = getWeekDayIndex(x, dayColumnStartEnd);
 			schedule.days[weekDayIndex].blocks.push({
