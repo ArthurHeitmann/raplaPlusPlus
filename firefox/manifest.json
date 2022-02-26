@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "raplaPlusPlus",
-	"version": "1.0",
+	"version": "1.1",
 	"description": "Makes for a more fancy version of RaPla.",
 	"icons": {
 		"128": "logo.png"

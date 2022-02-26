@@ -97,7 +97,7 @@ body {
 			.header {
 				position: sticky;
 				top: $header-height;
-				z-index: 1;
+				z-index: 2;
 				background: $bg;
 				border-bottom: $border;
 
@@ -159,7 +159,7 @@ body {
 					--background: white;
 					--color: black;
 					background-color: var(--background);
-					text-shadow: 0 0 2px var(--background), 0 0 4px var(--background), 0 0 6px var(--background);
+					text-shadow: 0 0 3px var(--background), 0 0 3px var(--background), 0 0 3px var(--background), 0 0 3px var(--background), 0 0 3px var(--background), 0 0 3px var(--background), 0 0 3px var(--background), 0 0 3px var(--background), 0 0 3px var(--background), 0 0 3px var(--background);
 					color: var(--color);
 					padding: .5rem 0 .5rem .5rem;
 					display: flex;
@@ -223,7 +223,10 @@ body {
 					.title {
 						text-align: initial;
 						font-weight: 600;
-						line-height: 1em;
+					}
+
+					:where(.title, .time, .location) {
+						line-height: 1.125em;
 					}
 
 					.downArrow {
