@@ -9,9 +9,10 @@ let mainExecuted = false;
 export function main() {
 	if (mainExecuted)
 		return;
+	console.log("oof")
 	mainExecuted = true;
 
-	document.body.classList.remove("loading");
+	setTimeout(() => document.body.classList.remove("loading"), 0);
 
 	weekSchedule = getWeekSchedule();
 

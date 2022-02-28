@@ -222,8 +222,9 @@ var mainExecuted = false;
 function main() {
   if (mainExecuted)
     return;
+  console.log("oof");
   mainExecuted = true;
-  document.body.classList.remove("loading");
+  setTimeout(() => document.body.classList.remove("loading"), 0);
   weekSchedule = getWeekSchedule();
   document.head.insertAdjacentHTML("beforeend", `<meta content="width=device-width, initial-scale=1" name="viewport" />`);
   document.head.insertAdjacentHTML("beforeend", `<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">`);

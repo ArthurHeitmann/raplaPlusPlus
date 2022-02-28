@@ -5,6 +5,7 @@ let isReady = false;
 browser.storage.local.get("enabled").then(({ enabled }) => {
 	if (!enabled)
 		return;
+	document.body.classList.add("loading");
 	if (isReady)
 		main();
 	else
@@ -27,4 +28,4 @@ browser.storage.onChanged.addListener((changes) => {
 		else
 			location.reload();
 	}
-})
+});

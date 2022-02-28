@@ -1,7 +1,7 @@
 {
 	"name": "Rapla++",
 	"description": "Rapla aber übersichtlicher",
-	"version": "1.0",
+	"version": "1.2",
 	"manifest_version": 3,
 	"icons": {
 		"128": "logo.png"
