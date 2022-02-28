@@ -107,17 +107,13 @@ function toggleBlock(this: HTMLElement) {
 
 function updateTimeMarker() {
 	const nowDate = new Date();
-	const dayColumn = weekSchedule.days.findIndex(day => day.day === nowDate.getDate())
+	const dayColumn = weekSchedule.days.findIndex(day => day.day === nowDate.getDate());
 	const todayData = weekSchedule.days[dayColumn];
 	let dayStartMinutes = todayData?.startHour * 60;
 	let dayDurationMinutes = (todayData?.endHour - todayData?.startHour) * 60;
 	// scroll to today
-	const dayElement = $css(".center > .day")[dayColumn];
-	if (dayElement && timeMarker.classList.contains("hide")) {
-		const bounds = dayElement.getBoundingClientRect();
-		if (bounds.left < 0 || bounds.right > window.innerHeight)
-			document.body.scrollBy({left: bounds.left - 100});
-	}
+	scrollIntoTodayOnce(dayColumn);
+
 	// hide if wrong month or time outside active hours or no column exists for this day
 	if (dayColumn === -1 ||
 		todayData.month !== nowDate.getMonth() + 1 ||
@@ -137,6 +133,20 @@ function updateTimeMarker() {
 	timeMarker.style.setProperty("--minutes", (
 		previousDaysMinutes + (nowDate.getHours() - todayData.startHour) * 60 + nowDate.getMinutes()
 		).toString());
+}
+
+let hasScrolledOnce = false;
+function scrollIntoTodayOnce(dayColumn: number) {
+	if (hasScrolledOnce)
+		return;
+	hasScrolledOnce = true;
+	const dayElement = $css(".center > .day")[dayColumn];
+	if (!(dayElement && timeMarker.classList.contains("hide"))) {
+		return;
+	}
+	const bounds = dayElement.getBoundingClientRect();
+	if (bounds.left < 0 || bounds.right > window.innerHeight)
+		document.body.scrollBy({left: bounds.left - 100});
 }
 
 let downArrowSvg: Element;

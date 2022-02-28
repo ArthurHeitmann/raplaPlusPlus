@@ -301,12 +301,7 @@ function updateTimeMarker() {
   const todayData = weekSchedule.days[dayColumn];
   let dayStartMinutes = todayData?.startHour * 60;
   let dayDurationMinutes = (todayData?.endHour - todayData?.startHour) * 60;
-  const dayElement = $css(".center > .day")[dayColumn];
-  if (dayElement && timeMarker.classList.contains("hide")) {
-    const bounds = dayElement.getBoundingClientRect();
-    if (bounds.left < 0 || bounds.right > window.innerHeight)
-      document.body.scrollBy({ left: bounds.left - 100 });
-  }
+  scrollIntoTodayOnce(dayColumn);
   if (dayColumn === -1 || todayData.month !== nowDate.getMonth() + 1 || nowDate.getHours() * 60 < dayStartMinutes || nowDate.getHours() * 60 >= dayStartMinutes + dayDurationMinutes) {
     timeMarker.classList.add("hide");
     return;
@@ -316,6 +311,19 @@ function updateTimeMarker() {
   }
   const previousDaysMinutes = weekSchedule.days.slice(0, dayColumn).reduce((prev, curr) => prev + (curr.endHour - curr.startHour), 0) * 60;
   timeMarker.style.setProperty("--minutes", (previousDaysMinutes + (nowDate.getHours() - todayData.startHour) * 60 + nowDate.getMinutes()).toString());
+}
+var hasScrolledOnce = false;
+function scrollIntoTodayOnce(dayColumn) {
+  if (hasScrolledOnce)
+    return;
+  hasScrolledOnce = true;
+  const dayElement = $css(".center > .day")[dayColumn];
+  if (!(dayElement && timeMarker.classList.contains("hide"))) {
+    return;
+  }
+  const bounds = dayElement.getBoundingClientRect();
+  if (bounds.left < 0 || bounds.right > window.innerHeight)
+    document.body.scrollBy({ left: bounds.left - 100 });
 }
 var downArrowSvg;
 function makeSvgArrow() {
